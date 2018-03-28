@@ -9,6 +9,7 @@ public class Menu : MonoBehaviour
 
     public Button playButton;
     public Button quitButton;
+    public Text highScoreText;
 
 	// Use this for initialization
 	void Start () {
@@ -16,6 +17,16 @@ public class Menu : MonoBehaviour
         Button quit = quitButton.GetComponent<Button>();
         play.onClick.AddListener(Onplay);
         quit.onClick.AddListener(Onquit);
+        //Post the High Score
+        int highScore = PlayerPrefs.GetInt("High_Score");
+        if(highScore <= 0)
+        {
+            highScoreText.text = "Play for a High Score!";
+        }
+        else
+        {
+            highScoreText.text = "Your high score is: " + highScore;
+        }
 	}
 	
 	// Update is called once per frame

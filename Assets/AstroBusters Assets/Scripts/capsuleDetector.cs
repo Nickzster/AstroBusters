@@ -16,6 +16,11 @@ public class capsuleDetector : MonoBehaviour
         other.incrementValues(0.005f, 5.0f); //This increases the difficulty
     }
 
+    public int getScore()
+    {
+        return count;
+    }
+
     private void increment()
     {
         if (GameObject.FindGameObjectWithTag("Player") != null)

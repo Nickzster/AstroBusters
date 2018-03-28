@@ -1552,6 +1552,8 @@ MonoBehaviour:
   explosionSound: {fileID: 192629603}
   explosion: {fileID: 100010, guid: 031d08f52af1daa4f929b85221519426, type: 2}
   player: {fileID: 1983482764}
+  Counter: {fileID: 1888625337}
+  counter: {fileID: 1888625338}
   Menu: {fileID: 40962637}
 --- !u!136 &1983482770
 CapsuleCollider:

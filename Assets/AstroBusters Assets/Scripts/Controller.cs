@@ -11,6 +11,8 @@ public class Controller : MonoBehaviour
     bool change; //tells the script that the direction needs to change.
     bool toggle = true; //tells the script which direction the ship needs to go.
     public GameObject player;
+    public GameObject Counter; //Reference to the Capsule Counter
+    public capsuleDetector counter; //Reference to the Capsule Counter script
 
 
     public GameObject Menu;
@@ -22,6 +24,12 @@ public class Controller : MonoBehaviour
     {
         GetComponent<Rigidbody>().useGravity = false;
         toggle = true;
+    }
+
+    private void Save(int checkScore)
+    {
+        PlayerPrefs.SetInt("High_Score", checkScore); //Set the new high score.
+        Debug.Log("The score " + checkScore + " was saved.");
     }
 
     public void changeDirection()
@@ -71,9 +79,7 @@ public class Controller : MonoBehaviour
         }
         if(change == true)
         {
-           GetComponent<Rigidbody>().velocity = Vector3.down * force;
-           Debug.Log("Vector Shifting");
-           force *= -1.0f;
+            changeDirection();
         }
         if(Input.touchCount == 0)
         {
@@ -97,6 +103,23 @@ public class Controller : MonoBehaviour
             Instantiate(explosion, transform.position, transform.rotation);
             Destroy(gameObject);
             Menu.SetActive(true);
+            int checkScore = PlayerPrefs.GetInt("High_Score");
+            Debug.Log(checkScore);
+            Debug.Log(counter.getScore());
+            if (checkScore != 0)
+            {
+                if (checkScore < counter.getScore()) //If the score that was met in this round is higher than check score
+                {
+                    Debug.Log("We have a new high score!");
+                    checkScore = counter.getScore(); //Set checkscore to this value. This is the newest high score.
+                    Save(checkScore);
+                }
+            }
+            else
+            {
+                Debug.Log("We have a new score.");
+                Save(counter.getScore());
+            }
         }
         if(col.gameObject.CompareTag("sides"))
         {
