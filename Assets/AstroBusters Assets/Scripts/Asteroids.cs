@@ -55,7 +55,8 @@ public class Asteroids : MonoBehaviour
             transform.Translate(0, 0 - offset, 0);
             offset = Random.Range(-7, 7);
             transform.Translate(0, 0 + offset, 0);
-            Asteroid = Instantiate(Asteroid, spawnAsteroid.position, spawnAsteroid.rotation) as Rigidbody;
+           // Asteroid = Instantiate(Asteroid, spawnAsteroid.position, spawnAsteroid.rotation) as Rigidbody;
+			Asteroid = Instantiate(Asteroid, spawnAsteroid.position, Quaternion.identity) as Rigidbody;
             Asteroid.AddForce(spawnAsteroid.right * netForce);
             canSpawn = false;
         }
