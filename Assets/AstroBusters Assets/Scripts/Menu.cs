@@ -16,23 +16,29 @@ public class Menu : MonoBehaviour
 	public Button[] backButtons;
 	/* Ship Menu Buttons */
 	public Button shipSelector;
-	public Button leftButton;
-	public Button rightButton;
+	public Button shipSelectionLeftButton;
+	public Button shipSelectionRightButton;
+
+	public Button helpMenuRightButton;
+	public Button helpMenuLeftButton;
 	/* Menu Game Objects */
 	public GameObject mainMenu;
 	public GameObject helpMenu;
 	public GameObject shipMenu;
 	/* Ship Menu variables */
 	private int ShipMenuCounter; //Keeps track of which menu to display
+	private int HelpMenuCounter;
 	private int SelectedShip;
 	public Button[] shipMenuButtons; //Keeps all of the ship buttons in an array. + Used to select which ship the player wants to play as.
 	public GameObject[] shipsMenu; //Keeps track of each individual ship menu.
+	public GameObject[] helperMenu;
 	public GameObject Locked;
 //	public GameObject[] Menus;
 //	public GameObject[] shipSelection;
     public Text highScoreText; //Displays the high score in the menu
 	public Text shipSelectionText; //Displays page # in ship menu.
 	bool updateShipMenu;
+	bool updateHelpMenu;
 	bool isUnlocked;
 	bool SCOREDEBUGGING;
 
@@ -50,8 +56,10 @@ public class Menu : MonoBehaviour
 		Button backZero = backButtons[0].GetComponent<Button>();
 		Button backOne = backButtons [1].GetComponent<Button>();
 		//initalize ship menu buttons
-		Button LeftButton = leftButton.GetComponent<Button>();
-		Button RightButton = rightButton.GetComponent<Button> ();
+		Button LeftShipSelectionButton = shipSelectionLeftButton.GetComponent<Button>();
+		Button RightShipSelectionButton = shipSelectionRightButton.GetComponent<Button> ();
+		Button LeftHelpMenuButton = helpMenuLeftButton.GetComponent<Button>();
+		Button RightHelpMenuButton = helpMenuRightButton.GetComponent<Button>();
 		Button PreferedShip = shipSelector.GetComponent<Button>();
 		Button[] ships = new Button[shipMenuButtons.Length]; //Local button object to keep track of ship buttons
 		for (int i = 0; i < shipMenuButtons.Length; i++) 
@@ -64,11 +72,14 @@ public class Menu : MonoBehaviour
 		help.onClick.AddListener(OnHelp);
 		shipSelectMenu.onClick.AddListener(OnShipMenuEnter);
 
-		backZero.onClick.AddListener(OnBack);
+		backZero.onClick.AddListener (OnBack);
 		backOne.onClick.AddListener (OnBack);
 
-		LeftButton.onClick.AddListener (OnLeftButton);
-		RightButton.onClick.AddListener (OnRightButton);
+		LeftShipSelectionButton.onClick.AddListener (OnShipSelectionLeftButton);
+		RightShipSelectionButton.onClick.AddListener (OnShipSelectionRightButton);
+		
+		LeftHelpMenuButton.onClick.AddListener(OnHelpMenuLeftButton);
+		RightHelpMenuButton.onClick.AddListener(OnHelpMenuRightButton);
 
 		PreferedShip.onClick.AddListener (OnSelectedShip);
 
@@ -76,6 +87,7 @@ public class Menu : MonoBehaviour
 
 		//Initalize the menu counter
 		ShipMenuCounter = 0;
+		HelpMenuCounter = 0;
 
         //Post the High Score
         int highScore = PlayerPrefs.GetInt("High_Score");
@@ -97,11 +109,16 @@ public class Menu : MonoBehaviour
 		}
 	}
 
-	void displayMenu()
+	void displayShipSelectionMenu()
 	{
 		shipsMenu [ShipMenuCounter].SetActive (true);
 		shipSelectionText.text = (ShipMenuCounter + 1) + " out of " + (shipMenuButtons.Length);
 		isUnlocked = true;
+	}
+
+	void displayHelpMenu()
+	{
+		helperMenu[HelpMenuCounter].SetActive(true);
 	}
 
 	void Update()
@@ -114,11 +131,11 @@ public class Menu : MonoBehaviour
 			//Then we need to show the current menu...
 			if (ShipMenuCounter == 0) //If we are on ship 1, which is unlocked by default
 			{  
-				displayMenu();
+				displayShipSelectionMenu();
 			} 
 			else if (PlayerPrefs.GetInt(("ship" + ShipMenuCounter)) != 0) //If this ship is unlocked
 			{ 
-				displayMenu();
+				displayShipSelectionMenu();
 			} 
 			else //Finally, if the ship is not locked.
 			{ 
@@ -129,6 +146,11 @@ public class Menu : MonoBehaviour
 			//And then we display the text
 			updateShipMenu = false;
 
+		}
+		else if(updateHelpMenu)
+		{
+			
+			displayHelpMenu();
 		}
 	}
 	
@@ -153,6 +175,7 @@ public class Menu : MonoBehaviour
 	{
 		mainMenu.SetActive(false);
 		helpMenu.SetActive(true);
+		updateHelpMenu = true;
 	}
 	void toMainMenu()
 	{
@@ -162,7 +185,9 @@ public class Menu : MonoBehaviour
 	}
 	void OnBack()
 	{
+		hideMenu();
 		toMainMenu();
+		HelpMenuCounter = 0;
 	}
 
 	void OnShipMenuEnter()
@@ -175,10 +200,13 @@ public class Menu : MonoBehaviour
 	void hideMenu()
 	{
 		shipsMenu[ShipMenuCounter].SetActive(false);
+		helperMenu[HelpMenuCounter].SetActive(false);
 		Locked.SetActive (false);
 	}
 
-	void OnRightButton() //If the player presses the right button
+	/* Ship Select Buttons */
+
+	void OnShipSelectionRightButton() //If the player presses the right button
 	{
 		Debug.Log ("Right button pressed");
 		hideMenu();
@@ -194,7 +222,7 @@ public class Menu : MonoBehaviour
 		updateShipMenu = true;
 		Debug.Log (ShipMenuCounter);
 	}
-	void OnLeftButton() //If the player presses the left button
+	void OnShipSelectionLeftButton() //If the player presses the left button
 	{
 		Debug.Log ("Left Button Pressed");
 		hideMenu();
@@ -222,6 +250,36 @@ public class Menu : MonoBehaviour
 		}
 		Debug.Log ("Player Prefered Ship: " + PlayerPrefs.GetInt("selected_ship"));
 		toMainMenu();
+	}
+
+	/* Help Buttons */
+
+	void OnHelpMenuLeftButton()
+	{
+		hideMenu();
+		if (HelpMenuCounter <= 0) //and the player is on the beginning menu
+		{
+			HelpMenuCounter = helperMenu.Length - 1; //place at the end of the list 
+		} 
+		else //and the player is not on the beginning menu
+		{
+			HelpMenuCounter--; //move the list one space to the left
+		}
+		updateHelpMenu = true; //and tell update to update the menu
+	}
+
+	void OnHelpMenuRightButton()
+	{
+		hideMenu();
+		if (HelpMenuCounter >= helperMenu.Length - 1) //and the player is on the last menu
+		{
+			HelpMenuCounter = 0; //place at the beginning of the list
+		} 
+		else  //and the player is not on the last menu
+		{
+			HelpMenuCounter++; //move the list 1 space to the right
+		}
+		updateHelpMenu = true;
 	}
 
 

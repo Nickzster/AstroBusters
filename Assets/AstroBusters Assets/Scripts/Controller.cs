@@ -7,13 +7,28 @@ public class Controller : MonoBehaviour
 {
     public float speed = 1.0f;
     public AudioSource explosionSound;
+
+	public AudioSource discharge;
+
+	public AudioSource charge;
     public GameObject explosion;
+    ParticleSystem explosionFx;
     bool change; //tells the script that the direction needs to change.
     bool toggle = true; //tells the script which direction the ship needs to go.
     public GameObject player;
-	public GameObject[] ships;
+	public GameObject[] ships; //refers to the selectible ships
+	public GameObject[] shields; //directly refers to the selected ships. Used to active or deactivate a ship's shield.
+
+	private int selectedShip; //used by shield, to determine which shield to activate.
+
+	private bool shielded = false; //determines whether the player is shielded or not
+	private bool toggleShield = false; //determines whether the shield needs to be toggled.
+
+	public Asteroids other;
 
 	private CapsuleCollider shipCollision;
+
+	private Transform playerTransform;
 
     public GameObject Counter; //Reference to the Capsule Counter
     public capsuleDetector counter; //Reference to the Capsule Counter script
@@ -23,10 +38,43 @@ public class Controller : MonoBehaviour
     public GameObject Menu;
     //input controls
 
+	public void chargeUp()
+	{
+		charge.Play();
+	}
+	void chargeDown()
+	{
+		discharge.Play();
+	}
 	void setCollisionValues(CapsuleCollider shipCollision, float newRadius, float newHeight)
 	{
 		shipCollision.radius = newRadius;
 		shipCollision.height = newHeight;
+	}
+
+	public bool Shielded()
+	{
+		return this.shielded;
+	}
+	private void shieldToggle()
+	{
+		this.toggleShield = true;
+	}
+	public void spawnShield()
+	{
+		this.shielded = true;
+		shieldToggle();
+	}
+
+    IEnumerator Wait()
+    {
+        yield return new WaitForSeconds(5);
+    }
+
+	public void destroyShield()
+	{
+		this.shielded = false;
+		shieldToggle();
 	}
     // Use this for initialization
     void Start()
@@ -36,6 +84,7 @@ public class Controller : MonoBehaviour
         toggle = true;
 		//Initalize ship
 		int SelectShip = PlayerPrefs.GetInt("selected_ship");
+		this.selectedShip = SelectShip;
 		shipCollision = GetComponent<CapsuleCollider>();
 //		Sprite currentShip = GetComponent<SpriteRenderer> ();
 		//Set the sprite for the ship
@@ -64,6 +113,9 @@ public class Controller : MonoBehaviour
 		default:
 			break;
 		}
+		//Initalize the explosion
+		 this.explosionFx = explosion.GetComponent<ParticleSystem>();
+		 playerTransform = player.GetComponent<Transform>();
     }
 
     private void Save(int checkScore)
@@ -75,7 +127,7 @@ public class Controller : MonoBehaviour
     public void changeDirection()
     {
         GetComponent<Rigidbody>().velocity = Vector3.down* speed; //Pushes the object in the desired direction
-        Debug.Log("Vector Shifting");
+        // Debug.Log("Vector Shifting");
 	    speed *= -1.0f; //changes the direction
     }
 
@@ -85,7 +137,7 @@ public class Controller : MonoBehaviour
 		if(Input.touchCount == 1 && toggle == true)
 		{
 			change = true;
-			Debug.Log("True");
+			// Debug.Log("True");
 			toggle = false; 
 		}
 		else
@@ -110,11 +162,11 @@ public class Controller : MonoBehaviour
 
         //WASD Version of Code
 #if UNITY_STANDALONE_WIN
-		Debug.Log("Stand Alone WINDOWS");
+		// Debug.Log("Stand Alone WINDOWS");
         if(Input.GetKeyDown("space") && toggle == true) //If the player presses the space bar, and the direction needs to change
 		{
 			change = true; //then change the direction
-			Debug.Log("True");
+			// Debug.Log("True");
 			toggle = false; 
 		}
 		else //If the player is not pressing the keyboard
@@ -138,7 +190,27 @@ public class Controller : MonoBehaviour
 		mobileInput();
 		Debug.Log("Stand Alone ANDROID");
 #endif
+		if(shielded)
+		{
+			if(toggleShield)
+			{
+				//activate shield
+				shields[selectedShip].SetActive(true);
+				// shields[selectedShip].fadeObjectIn();
+				toggleShield = false;
+			}
 
+		}
+		else
+		{
+			if(toggleShield)
+			{
+				shields[selectedShip].SetActive(false);
+				//deactivate shield
+				toggleShield = false;
+			}
+
+		}
     }
 
 	void unlockShips(int score)
@@ -173,17 +245,16 @@ public class Controller : MonoBehaviour
 
     void OnCollisionEnter(Collision col)
     {
-        Debug.Log("A collision has occured!");
-        if (col.gameObject.CompareTag("asteroid"))
+        // Debug.Log("A collision has occured!(1)");
+        if (col.gameObject.CompareTag("asteroid") && !(shielded)) //if an asteroid hits the player, and is not shielded.
         {
 			explosionSound.Play();
-            Instantiate(explosion, transform.position, transform.rotation);
-            Destroy(gameObject);
-			Destroy(this);
+			ParticleSystem exp = Instantiate(explosionFx, playerTransform.position, Quaternion.identity) as ParticleSystem;
+			StartCoroutine("Wait");
             Menu.SetActive(true);
             int checkScore = PlayerPrefs.GetInt("High_Score");
-            Debug.Log(checkScore);
-            Debug.Log(counter.getScore());
+            // Debug.Log(checkScore);
+            // Debug.Log(counter.getScore());
 			unlockShips(counter.getScore());
             if (checkScore != 0) //if high score has been initalized
             {
@@ -201,8 +272,15 @@ public class Controller : MonoBehaviour
                 Debug.Log("We have a new score.");
                 Save(counter.getScore());
             }
+			            Destroy(gameObject);
+			Destroy(this);
         }
-        if(col.gameObject.CompareTag("sides"))
+		else if(col.gameObject.CompareTag("asteroid") && shielded) //if an asteroid hits the player, and it is shielded
+		{
+			destroyShield();
+			chargeDown();
+		}
+        else if(col.gameObject.CompareTag("sides"))
         {
             changeDirection();
         }

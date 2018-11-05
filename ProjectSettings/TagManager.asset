@@ -7,6 +7,10 @@ TagManager:
   - asteroid
   - Fire
   - sides
+  - timestwo
+  - hard
+  - easy
+  - shield
   layers:
   - Default
   - TransparentFX
