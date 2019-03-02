@@ -75,8 +75,8 @@ public class Controller : MonoBehaviour
 
 	public void destroyShield()
 	{
-		this.shielded = false;
 		shieldToggle();
+		this.shielded = false;
 	}
     // Use this for initialization
     void Start()
@@ -277,7 +277,7 @@ public class Controller : MonoBehaviour
                 Debug.Log("We have a new score.");
                 Save(counter.getScore());
             }
-			            Destroy(gameObject);
+			Destroy(gameObject);
 			Destroy(this);
         }
 		else if(col.gameObject.CompareTag("asteroid") && shielded) //if an asteroid hits the player, and it is shielded
