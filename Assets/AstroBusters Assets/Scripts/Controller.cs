@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class Controller : MonoBehaviour
 {
+
+	private bool gameStart;
     public float speed = 1.0f;
     public AudioSource explosionSound;
 
@@ -79,6 +81,7 @@ public class Controller : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+		gameStart = false;
 		Application.targetFrameRate = 144;
         GetComponent<Rigidbody>().useGravity = false;
         toggle = true;
@@ -136,6 +139,7 @@ public class Controller : MonoBehaviour
 	{
 		if(Input.touchCount == 1 && toggle == true)
 		{
+			if(!gameStart){ other.startGame(); this.gameStart = false;}
 			change = true;
 			// Debug.Log("True");
 			toggle = false; 
@@ -161,10 +165,11 @@ public class Controller : MonoBehaviour
     {
 
         //WASD Version of Code
-#if UNITY_STANDALONE_WIN
+#if UNITY_STANDALONE_WIN || UNITY_WEBGL
 		// Debug.Log("Stand Alone WINDOWS");
         if(Input.GetKeyDown("space") && toggle == true) //If the player presses the space bar, and the direction needs to change
 		{
+			if(!gameStart){ other.startGame(); this.gameStart = false;}
 			change = true; //then change the direction
 			// Debug.Log("True");
 			toggle = false; 
